@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grelha Ativa - Monitorização da Participação</title>
+    <style>
+        :root {
+            /* Paleta de Cores Primitiva */
+            --color-white: #fff;
+            --color-black: #000;
+            --color-cream-50: #fcfcf9;
+            --color-cream-100: #fffffD;
+            --color-gray-200: #f5f5f5;
+            --color-gray-300: #a7a9a9;
+            --color-gray-400: #777c7c;
+            --color-slate-500: #626c71;
+            --color-brown-600: #5e5240;
+            --color-charcoal-700: #1f2121;
+            --color-charcoal-800: #262828;
+            --color-slate-900: #13343b;
+            --color-teal-300: #32b8c6;
+            --color-teal-400: #2da6b2;
+            --color-teal-500: #21808d;
+            --color-teal-600: #1d7480;
+            --color-teal-700: #1a6873;
+            --color-red-400: #ff5459;
+            --color-red-500: #c0152f;
+            --color-orange-400: #e68161;
+            --color-orange-500: #a84b2f;
+
+            /* Cores RGB para controlo de opacidade */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-red-500-rgb: 192, 21, 47;
+
+            /* Tokens de Cor Semânticos (Modo Claro) */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-primary-active: var(--color-teal-700);
+            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-btn-primary-text: var(--color-cream-50);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-error: var(--color-red-500);
+            --color-success: var(--color-teal-500);
+            --color-warning: var(--color-orange-500);
+            --color-info: var(--color-slate-500);
+            --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+
+            /* Tipografia */
+            --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-bold: 600;
+
+            /* Espaçamento */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+
+            /* Raio da Borda */
+            --radius-sm: 6px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Sombras */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+
+            /* Animação */
+            --duration-normal: 250ms;
+            --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+            /* Layout */
+            --container-xl: 1280px;
+        }
+
+        /* Estilos Base */
+        html {
+            font-family: var(--font-family-base);
+            color: var(--color-text);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        h3 { font-size: var(--font-size-xl); margin: 0; }
+        h4 { font-size: var(--font-size-lg); margin: 0; }
+
+        /* Botões */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8) var(--space-16);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-standard);
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--color-focus-ring);
+            outline-offset: 2px;
+        }
+        .btn--primary { background-color: var(--color-primary); color: var(--color-btn-primary-text); }
+        .btn--primary:hover { background-color: var(--color-primary-hover); }
+        .btn--secondary { background-color: var(--color-secondary); color: var(--color-text); }
+        .btn--secondary:hover { background-color: var(--color-secondary-hover); }
+        .btn--outline { background-color: transparent; border-color: var(--color-border); color: var(--color-text); }
+        .btn--outline:hover { background-color: var(--color-secondary); }
+        .btn--danger { background-color: var(--color-error); color: var(--color-white); }
+        .btn--danger:hover { background-color: rgba(var(--color-red-500-rgb), 0.85); }
+        .btn--sm { padding: var(--space-4) var(--space-12); font-size: var(--font-size-sm); border-radius: var(--radius-sm); }
+        .btn--full-width { width: 100%; }
+
+        /* Formulários */
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: var(--space-8) var(--space-12);
+            color: var(--color-text);
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+        }
+        .form-label { display: block; margin-bottom: var(--space-8); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); }
+        .form-group { margin-bottom: var(--space-16); }
+
+        /* Componente Card */
+        .card {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-16);
+        }
+
+        /* Indicadores de Estado */
+        .status { display: inline-flex; padding: var(--space-4) var(--space-12); border-radius: var(--radius-full); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); }
+        .status--success { background-color: rgba(var(--color-teal-500-rgb), 0.15); color: var(--color-success); }
+        .status--info { background-color: rgba(var(--color-slate-900-rgb), 0.1); color: var(--color-info); }
+        .status--warning { background-color: rgba(var(--color-orange-500), 0.15); color: var(--color-warning); }
+
+        /* Layout do Container */
+        .container { width: 100%; margin: 0 auto; padding: 0 var(--space-16); max-width: var(--container-xl); }
+
+        /* Estilos Específicos da Aplicação */
+        .app-container { min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Cabeçalho */
+        .header { background-color: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--space-16) 0; box-shadow: var(--shadow-sm); }
+        .header .container { display: flex; align-items: center; justify-content: space-between; }
+        .header__title { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary); margin: 0; }
+        .class-selector { font-size: var(--font-size-lg); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px dotted var(--color-text-secondary); padding-bottom: 2px; transition: color var(--duration-normal), border-color var(--duration-normal); }
+        .class-selector:hover { color: var(--color-primary); border-color: var(--color-primary); }
+
+        /* Conteúdo Principal */
+        .main-content { flex: 1; padding: var(--space-24) 0; }
+        .layout-container { display: grid; grid-template-columns: 280px 1fr 280px; gap: var(--space-24); }
+
+        /* Painéis */
+        .students-panel, .control-panel { height: fit-content; max-height: calc(100vh - 160px); display: flex; flex-direction: column; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-16); padding-bottom: var(--space-16); border-bottom: 1px solid var(--color-card-border); }
+        .students-list { min-height: 200px; margin-bottom: var(--space-16); overflow-y: auto; }
+        .panel-actions { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-8); }
+
+        .student-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-12); margin-bottom: var(--space-8); background-color: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-base); cursor: grab; user-select: none; transition: background-color var(--duration-normal); }
+        .student-item:hover { background-color: var(--color-secondary); }
+        .student-name { font-weight: var(--font-weight-medium); }
+        .student-number { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .student-actions { display: flex; align-items: center; gap: var(--space-4); }
+        .student-action-btn { background: none; border: none; font-size: var(--font-size-lg); cursor: pointer; padding: var(--space-4); border-radius: var(--radius-sm); transition: color var(--duration-normal), background-color var(--duration-normal); }
+        .student-action-btn.edit { color: var(--color-info); }
+        .student-action-btn.edit:hover { color: var(--color-primary); background-color: var(--color-secondary); }
+        .student-action-btn.remove { color: var(--color-error); }
+        .student-action-btn.remove:hover { background-color: rgba(var(--color-red-500-rgb), 0.1); }
+
+        /* Secção da Sala de Aula */
+        .classroom-section { display: flex; flex-direction: column; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-16); }
+        .classroom-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: var(--space-8); flex: 1; background-color: var(--color-surface); padding: var(--space-16); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); }
+
+        .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8); border-radius: var(--radius-base); transition: all var(--duration-normal) var(--ease-standard); position: relative; }
+        .grid-cell.empty { border: 2px dashed var(--color-border); background-color: rgba(var(--color-slate-900-rgb), 0.02); }
+        .grid-cell.occupied { border: 1px solid var(--color-border); background-color: var(--color-surface); cursor: pointer; }
+        .grid-cell.occupied:hover { border-color: var(--color-primary); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .grid-cell.drag-over { border-color: var(--color-primary); background-color: var(--color-secondary); border-style: solid; }
+        .grid-cell.participated { background-color: rgba(var(--color-teal-500-rgb), 0.2); border-color: var(--color-success); }
+        .cell-student-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); text-align: center; }
+        .cell-student-number { font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: 2px; }
+        .interaction-count { position: absolute; top: var(--space-4); right: var(--space-4); background-color: var(--color-primary); color: var(--color-btn-primary-text); border-radius: var(--radius-full); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); }
+        .note-indicator { position: absolute; bottom: var(--space-4); left: var(--space-4); font-size: 14px; }
+
+        .grid-cell.highlight { animation: highlight-animation 3s ease-out; }
+        @keyframes highlight-animation {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-teal-500-rgb), 0.7); }
+            40% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(var(--color-teal-500-rgb), 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-teal-500-rgb), 0); }
+        }
+
+        /* Painel de Controlo */
+        .control-actions { display: flex; flex-direction: column; gap: var(--space-12); margin-bottom: var(--space-24); }
+        .statistics { padding-top: var(--space-16); border-top: 1px solid var(--color-card-border); }
+        .stats-grid { display: flex; flex-direction: column; gap: var(--space-12); }
+        .stat-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space-12); background-color: var(--color-background); border-radius: var(--radius-base); }
+        .stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .stat-value { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-primary); }
+
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal__overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+        .modal__content { position: relative; background-color: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; z-index: 1001; }
+        .modal__content--large { max-width: 800px; }
+        .modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-16) var(--space-24); border-bottom: 1px solid var(--color-card-border); }
+        .modal__close { background: none; border: none; font-size: var(--font-size-3xl); color: var(--color-text-secondary); cursor: pointer; line-height: 1; }
+        .modal__body { padding: var(--space-24); overflow-y: auto; }
+        .modal__footer { padding: var(--space-12) var(--space-24); border-top: 1px solid var(--color-card-border); display: flex; justify-content: flex-end; gap: var(--space-12); }
+        .confirm-modal__actions { display: flex; justify-content: flex-end; gap: var(--space-12); margin-top: var(--space-24); }
+
+        /* Menu de Interação */
+        .interaction-menu { position: fixed; background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 1000; min-width: 250px; display: none; }
+        .interaction-menu.active { display: block; }
+        .interaction-menu__header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-12) var(--space-16); border-bottom: 1px solid var(--color-card-border); }
+        .interaction-menu__close { background: none; border: none; font-size: var(--font-size-xl); color: var(--color-text-secondary); cursor: pointer; }
+        .interaction-menu__body { padding: var(--space-8); }
+        .interaction-btn { display: flex; align-items: center; gap: var(--space-12); width: 100%; padding: var(--space-12); background: none; border: none; border-radius: var(--radius-base); cursor: pointer; font-size: var(--font-size-base); text-align: left; }
+        .interaction-btn:hover { background-color: var(--color-secondary); }
+        .interaction-icon { font-size: var(--font-size-lg); }
+        .interaction-menu__notes { padding: var(--space-8); border-top: 1px solid var(--color-border); }
+        .interaction-menu__notes textarea { width: 100%; min-height: 60px; resize: vertical; margin-bottom: var(--space-8); }
+
+        /* Modal de Relatório e Histórico */
+        .report-section { margin-bottom: var(--space-24); }
+        .participation-list, .history-list { display: flex; flex-direction: column; gap: var(--space-8); }
+        .participation-item, .history-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-12); background-color: var(--color-background); border-radius: var(--radius-base); border: 1px solid var(--color-border); }
+        .history-item-actions { display: flex; gap: var(--space-8); }
+        .report-details { border: 1px solid var(--color-border); border-radius: var(--radius-base); margin-bottom: var(--space-8); }
+        .report-details[open] .report-summary { border-bottom: 1px solid var(--color-border); }
+        .report-summary { padding: var(--space-12); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: var(--font-weight-medium); list-style: none; }
+        .report-summary::-webkit-details-marker { display: none; }
+        .report-summary:hover { background-color: var(--color-secondary); }
+        .report-student-list { padding: var(--space-8) var(--space-12) var(--space-12) var(--space-24); margin: 0; list-style-type: none; }
+        .report-student-list li { padding: var(--space-4) 0; color: var(--color-text-secondary); }
+        .report-student-list li strong { color: var(--color-text); }
+        .report-summary-label { display: flex; align-items: center; gap: var(--space-8); }
+
+        /* Feedback Visual de Arrastar e Soltar */
+        .dragging { opacity: 0.5; }
+        .empty-state { text-align: center; color: var(--color-text-secondary); padding: var(--space-24); }
+
+        /* Notificações Toast */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+        .toast { color: white; padding: 12px 16px; border-radius: var(--radius-base); box-shadow: var(--shadow-lg); max-width: 300px; animation: slideIn 0.3s ease-out; font-size: var(--font-size-sm); }
+        .toast--success { background-color: var(--color-success); }
+        .toast--error { background-color: var(--color-error); }
+        .toast--info { background-color: var(--color-info); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .layout-container { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .students-panel, .control-panel { max-height: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <div class="container">
+                <h1 class="header__title">Grelha Ativa</h1>
+                <div id="class-selector-container">
+                    <span id="active-class-name" class="class-selector"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <div class="container">
+                <div class="layout-container">
+                    <!-- Painel da Lista de Alunos -->
+                    <aside class="students-panel card">
+                        <div class="panel-header">
+                            <h3>Lista de Alunos</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn--secondary btn--sm" id="import-csv-btn">Importar CSV</button>
+                                <button class="btn btn--primary btn--sm" id="add-student-btn-modal">Adicionar</button>
+                            </div>
+                        </div>
+                        <div class="students-list" id="students-list"></div>
+                        <div class="panel-actions">
+                            <button class="btn btn--secondary btn--sm btn--full-width" id="save-layout-btn">Guardar Layout</button>
+                            <button class="btn btn--outline btn--sm btn--full-width" id="class-history-btn">Histórico de Aulas</button>
+                        </div>
+                    </aside>
+
+                    <!-- Grelha da Sala de Aula -->
+                    <div class="classroom-section">
+                        <div class="section-header">
+                            <h3>Layout da Sala</h3>
+                            <div id="class-status"></div>
+                        </div>
+                        <div class="classroom-grid" id="classroom-grid"></div>
+                    </div>
+
+                    <!-- Painel de Controlo -->
+                    <aside class="control-panel card">
+                        <div class="panel-header">
+                            <h3>Painel de Controlo</h3>
+                        </div>
+                        <div class="control-actions">
+                            <button class="btn btn--primary btn--full-width" id="toggle-class-btn">Iniciar Aula</button>
+                            <button class="btn btn--secondary btn--full-width" id="random-student-btn">Selecionar Aluno Aleatório</button>
+                            <button class="btn btn--outline btn--full-width" id="clear-data-btn">Limpar Dados da Aula</button>
+                        </div>
+                        <div class="statistics" id="statistics" style="display: none;">
+                            <h4>Estatísticas da Aula</h4>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total de Interações</span>
+                                    <span class="stat-value" id="total-interactions">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Alunos Participantes</span>
+                                    <span class="stat-value" id="participating-students">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Input de ficheiro oculto para importação de CSV -->
+    <input type="file" id="csv-file-input" style="display: none;" accept=".csv">
+
+    <!-- Container para as notificações Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Modais -->
+    <div class="modal" id="add-student-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3>Adicionar Aluno</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <form id="add-student-form">
+                    <div class="form-group">
+                        <label class="form-label" for="add-student-name">Nome do Aluno</label>
+                        <input type="text" class="form-control" id="add-student-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="add-student-number">Número do Aluno</label>
+                        <input type="text" class="form-control" id="add-student-number" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn--primary btn--full-width">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="edit-student-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3>Editar Aluno</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <form id="edit-student-form">
+                    <input type="hidden" id="edit-student-id">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-student-name">Nome do Aluno</label>
+                        <input type="text" class="form-control" id="edit-student-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-student-number">Número do Aluno</label>
+                        <input type="text" class="form-control" id="edit-student-number" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn--primary btn--full-width">Guardar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="interaction-menu" id="interaction-menu">
+        <div class="interaction-menu__header">
+            <h4 id="interaction-student-name"></h4>
+            <button class="interaction-menu__close">&times;</button>
+        </div>
+        <div class="interaction-menu__body"></div>
+        <div class="interaction-menu__notes">
+            <textarea id="interaction-note-textarea" class="form-control" placeholder="Adicionar nota..."></textarea>
+            <button id="save-note-btn" class="btn btn--primary btn--sm btn--full-width">Guardar Nota</button>
+        </div>
+    </div>
+
+    <div class="modal" id="report-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h3 id="report-modal-title">Relatório da Aula</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="report-section">
+                    <h4>Alunos Menos Participativos</h4>
+                    <div id="low-participation-list" class="participation-list"></div>
+                </div>
+                <div class="report-section">
+                    <h4>Detalhe das Interações</h4>
+                    <div id="interaction-details-container"></div>
+                </div>
+                <div class="report-section">
+                    <h4>Anotações da Aula</h4>
+                    <div id="notes-details-container" class="report-student-list"></div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--primary" id="export-report-btn">Exportar para CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="history-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h3>Histórico de Aulas</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div id="history-list-container" class="history-list">
+                    <!-- O histórico será preenchido aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="confirm-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 id="confirm-modal-title">Confirmar Ação</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <p id="confirm-modal-text"></p>
+                <div class="confirm-modal__actions">
+                    <button class="btn btn--outline" id="confirm-cancel-btn">Cancelar</button>
+                    <button class="btn btn--primary" id="confirm-ok-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="manage-classes-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3>Gerir Turmas</h3>
+                <button class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="form-group">
+                    <label for="class-select-dropdown" class="form-label">Turma Ativa</label>
+                    <select id="class-select-dropdown" class="form-control"></select>
+                </div>
+                <hr style="margin: var(--space-24) 0;">
+                <form id="create-class-form" class="form-group">
+                    <label for="new-class-name" class="form-label">Criar Nova Turma</label>
+                    <input type="text" id="new-class-name" class="form-control" placeholder="Nome da nova turma" required>
+                    <button type="submit" class="btn btn--primary btn--full-width" style="margin-top: var(--space-8);">Criar</button>
+                </form>
+                <hr style="margin: var(--space-24) 0;">
+                <form id="rename-class-form" class="form-group">
+                    <label for="rename-class-name" class="form-label">Renomear Turma Ativa</label>
+                    <input type="text" id="rename-class-name" class="form-control" placeholder="Novo nome para a turma" required>
+                    <button type="submit" class="btn btn--secondary btn--full-width" style="margin-top: var(--space-8);">Renomear</button>
+                </form>
+                <hr style="margin: var(--space-24) 0;">
+                <div class="form-group">
+                    <label class="form-label">Apagar Turma Ativa</label>
+                    <button type="button" class="btn btn--danger btn--full-width" id="delete-class-btn">Apagar Turma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONSTANTES, ESTADO E ELEMENTOS DO DOM ---
+            const GRID_SIZE = 36;
+            const APP_STATE_KEY = 'grelhaAtivaMultiClassState_v3';
+
+            const INTERACTION_TYPES = {
+                "question": { label: "Fez uma pergunta", icon: "❓" },
+                "correct_answer": { label: "Deu resposta correcta", icon: "✅" },
+                "difficulty": { label: "Mostrou dificuldade", icon: "🤔" },
+                "helped_colleague": { label: "Ajudou um colega", icon: "🤝" }
+            };
+
+            const initialClassState = () => ({
+                id: null, name: '', students: [], classroomLayout: {},
+                sessions: [], currentSessionId: null, nextStudentId: 1, nextSessionId: 1,
+            });
+
+            let appState = { classes: {}, activeClassId: null, nextClassId: 1 };
+
+            const DOMElements = {
+                activeClassName: document.getElementById('active-class-name'),
+                studentsList: document.getElementById('students-list'),
+                classroomGrid: document.getElementById('classroom-grid'),
+                toggleClassBtn: document.getElementById('toggle-class-btn'),
+                classStatus: document.getElementById('class-status'),
+                statistics: document.getElementById('statistics'),
+                totalInteractions: document.getElementById('total-interactions'),
+                participatingStudents: document.getElementById('participating-students'),
+                addStudentForm: document.getElementById('add-student-form'),
+                editStudentForm: document.getElementById('edit-student-form'),
+                interactionMenu: document.getElementById('interaction-menu'),
+                interactionMenuBody: document.querySelector('#interaction-menu .interaction-menu__body'),
+                interactionNoteTextarea: document.getElementById('interaction-note-textarea'),
+                saveNoteBtn: document.getElementById('save-note-btn'),
+                confirmModal: document.getElementById('confirm-modal'),
+                confirmModalText: document.getElementById('confirm-modal-text'),
+                confirmOkBtn: document.getElementById('confirm-ok-btn'),
+                manageClassesModal: document.getElementById('manage-classes-modal'),
+                classSelectDropdown: document.getElementById('class-select-dropdown'),
+                createClassForm: document.getElementById('create-class-form'),
+                renameClassForm: document.getElementById('rename-class-form'),
+                deleteClassBtn: document.getElementById('delete-class-btn'),
+                csvFileInput: document.getElementById('csv-file-input'),
+                importCsvBtn: document.getElementById('import-csv-btn'),
+                randomStudentBtn: document.getElementById('random-student-btn'),
+                toastContainer: document.getElementById('toast-container'),
+                classHistoryBtn: document.getElementById('class-history-btn'),
+                historyListContainer: document.getElementById('history-list-container'),
+                reportModalTitle: document.getElementById('report-modal-title'),
+                notesDetailsContainer: document.getElementById('notes-details-container'),
+            };
+
+            // --- DECLARAÇÃO DE TODAS AS FUNÇÕES ---
+
+            // Funções de Lógica de Negócio e Gestão de Estado
+            function getActiveClass() { return appState.classes[appState.activeClassId] || null; }
+            function getCurrentSession() {
+                const activeClass = getActiveClass();
+                if (!activeClass || !activeClass.currentSessionId) return null;
+                return activeClass.sessions.find(s => s.id === activeClass.currentSessionId) || null;
+            };
+
+            function saveState() {
+                try {
+                    localStorage.setItem(APP_STATE_KEY, JSON.stringify(appState));
+                } catch (e) {
+                    console.error("Falha ao guardar o estado no localStorage", e);
+                    showToast("Não foi possível guardar o estado.", "error");
+                }
+            };
+
+            function loadState() {
+                try {
+                    const savedStateJSON = localStorage.getItem(APP_STATE_KEY);
+                    if (savedStateJSON) {
+                        const savedState = JSON.parse(savedStateJSON);
+                        appState = savedState;
+                        for (const classId in appState.classes) {
+                            if (Object.prototype.hasOwnProperty.call(appState.classes, classId)) {
+                                const classData = appState.classes[classId];
+                                classData.sessions = classData.sessions || [];
+                                classData.sessions.forEach(session => {
+                                    session.notes = session.notes || {}; // Garante que a propriedade notes existe
+                                });
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Falha ao carregar ou validar o estado do localStorage", e);
+                    appState = { classes: {}, activeClassId: null, nextClassId: 1 };
+                }
+            };
+
+            function createNewClass(name, shouldSave = true) {
+                const newClassId = `class_${appState.nextClassId++}`;
+                appState.classes[newClassId] = { ...initialClassState(), id: newClassId, name: name };
+                appState.activeClassId = newClassId;
+                if (shouldSave) {
+                    saveState();
+                    showToast(`Turma "${name}" criada com sucesso.`, 'success');
+                }
+            };
+
+            // Funções de Renderização e UI
+            function renderAll() {
+                const activeClass = getActiveClass();
+                if (!activeClass) {
+                    document.querySelector('.layout-container').style.display = 'none';
+                    updateHeader();
+                    return;
+                }
+                document.querySelector('.layout-container').style.display = 'grid';
+                renderStudentsList();
+                renderClassroomGrid();
+                updateStatistics();
+                updateClassStatusUI();
+                updateHeader();
+                setupDragAndDrop();
+            };
+            
+            function renderStudentsList() {
+                const activeClass = getActiveClass();
+                if (!activeClass) {
+                    DOMElements.studentsList.innerHTML = `<div class="empty-state"><p>Nenhuma turma selecionada.</p></div>`;
+                    return;
+                }
+                const studentsInGridIds = new Set(Object.values(activeClass.classroomLayout || {}).filter(Boolean).map(s => s.id));
+                const availableStudents = activeClass.students.filter(student => !studentsInGridIds.has(student.id));
+
+                if (activeClass.students.length === 0) {
+                    DOMElements.studentsList.innerHTML = `<div class="empty-state"><p>Nenhum aluno. Adicione ou importe.</p></div>`;
+                } else if (availableStudents.length === 0) {
+                    DOMElements.studentsList.innerHTML = `<div class="empty-state"><p>Todos os alunos na grelha.</p></div>`;
+                } else {
+                    DOMElements.studentsList.innerHTML = availableStudents.map(student => `
+                        <div class="student-item" draggable="true" data-student-id="${student.id}">
+                            <div>
+                                <div class="student-name">${student.name}</div>
+                                <div class="student-number">Nº ${student.number}</div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="student-action-btn edit" data-student-id="${student.id}" title="Editar aluno">✏️</button>
+                                <button class="student-action-btn remove" data-student-id="${student.id}" title="Remover aluno">&times;</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            };
+
+            function renderClassroomGrid() {
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                const currentSession = getCurrentSession();
+                const interactions = currentSession ? currentSession.interactions : {};
+                const notes = currentSession ? currentSession.notes : {};
+                const layout = activeClass.classroomLayout;
+
+                const gridHtml = Array.from({ length: GRID_SIZE }, (_, i) => {
+                    const student = layout[i];
+                    if (!student) {
+                        return `<div class="grid-cell empty" data-cell-index="${i}"></div>`;
+                    }
+                    const interactionCount = Object.values(interactions[student.id] || {}).reduce((a, b) => a + b, 0);
+                    const hasNote = notes[student.id] && notes[student.id].trim() !== '';
+
+                    return `
+                        <div class="grid-cell occupied ${interactionCount > 0 ? 'participated' : ''}" data-cell-index="${i}" data-student-id="${student.id}">
+                            <div class="cell-student-name">${student.name}</div>
+                            <div class="cell-student-number">Nº ${student.number}</div>
+                            ${interactionCount > 0 ? `<div class="interaction-count">${interactionCount}</div>` : ''}
+                            ${hasNote ? `<div class="note-indicator" title="Este aluno tem uma nota">🗒️</div>` : ''}
+                        </div>`;
+                }).join('');
+                DOMElements.classroomGrid.innerHTML = gridHtml;
+            };
+
+            function updateStatistics() {
+                const currentSession = getCurrentSession();
+                if (!currentSession) {
+                    DOMElements.totalInteractions.textContent = 0;
+                    DOMElements.participatingStudents.textContent = 0;
+                    return;
+                }
+                const interactions = currentSession.interactions;
+                const totalInteractions = Object.values(interactions).flatMap(Object.values).reduce((sum, count) => sum + count, 0);
+                const participatingStudentsCount = Object.keys(interactions).filter(id => Object.values(interactions[id]).reduce((a, b) => a + b, 0) > 0).length;
+                DOMElements.totalInteractions.textContent = totalInteractions;
+                DOMElements.participatingStudents.textContent = participatingStudentsCount;
+            };
+
+            function updateClassStatusUI() {
+                const currentSession = getCurrentSession();
+                const isActive = !!currentSession;
+                DOMElements.toggleClassBtn.textContent = isActive ? 'Terminar Aula' : 'Iniciar Aula';
+                DOMElements.toggleClassBtn.classList.toggle('btn--primary', !isActive);
+                DOMElements.toggleClassBtn.classList.toggle('btn--outline', isActive);
+                DOMElements.classStatus.innerHTML = isActive ? '<span class="status status--success">Aula Ativa</span>' : '<span class="status status--info">Configuração</span>';
+                DOMElements.statistics.style.display = isActive ? 'block' : 'none';
+            };
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast--${type}`;
+                toast.textContent = message;
+                DOMElements.toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease-in forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            };
+
+            function showModal(modalId) {
+                closeAllModals();
+                const modal = document.getElementById(modalId);
+                if (modal) modal.classList.add('active');
+            };
+            function closeAllModals() { document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active')); };
+            function showConfirmation(message, onConfirm) {
+                DOMElements.confirmModalText.textContent = message;
+                const newOkBtn = DOMElements.confirmOkBtn.cloneNode(true);
+                DOMElements.confirmOkBtn.parentNode.replaceChild(newOkBtn, DOMElements.confirmOkBtn);
+                DOMElements.confirmOkBtn = newOkBtn;
+                DOMElements.confirmOkBtn.addEventListener('click', () => {
+                    closeAllModals();
+                    onConfirm();
+                }, { once: true });
+                showModal('confirm-modal');
+            };
+            function closeInteractionMenu() { DOMElements.interactionMenu.classList.remove('active'); };
+            function showInteractionMenu(cell, student) {
+                const rect = cell.getBoundingClientRect();
+                const menu = DOMElements.interactionMenu;
+                menu.dataset.studentId = student.id;
+                document.getElementById('interaction-student-name').textContent = student.name;
+                
+                const session = getCurrentSession();
+                DOMElements.interactionNoteTextarea.value = session?.notes?.[student.id] || '';
+
+                menu.style.left = `${rect.left}px`;
+                menu.style.top = `${rect.bottom + 5}px`;
+                if (rect.bottom + menu.offsetHeight > window.innerHeight) menu.style.top = `${rect.top - menu.offsetHeight - 5}px`;
+                if (rect.left + menu.offsetWidth > window.innerWidth) menu.style.left = `${rect.right - menu.offsetWidth}px`;
+                menu.classList.add('active');
+            };
+            function updateHeader() { DOMElements.activeClassName.textContent = getActiveClass()?.name || "Nenhuma turma"; };
+            
+            // Funções Handler de Eventos
+            function handleDrop(e) {
+                e.preventDefault();
+                const activeClass = getActiveClass();
+                if (!activeClass || activeClass.currentSessionId) return;
+                e.currentTarget.classList.remove('drag-over');
+                const studentId = parseInt(e.dataTransfer.getData('text/plain'));
+                const targetCellIndex = parseInt(e.currentTarget.dataset.cellIndex);
+                const originCellIndex = e.dataTransfer.getData('origin-cell');
+                const student = activeClass.students.find(s => s.id === studentId);
+                if (!student) return;
+                const studentInTargetCell = activeClass.classroomLayout[targetCellIndex];
+                if (originCellIndex) delete activeClass.classroomLayout[originCellIndex];
+                activeClass.classroomLayout[targetCellIndex] = student;
+                if (studentInTargetCell && originCellIndex) {
+                    activeClass.classroomLayout[originCellIndex] = studentInTargetCell;
+                }
+                saveState();
+                renderAll();
+            }
+
+            function handleCellClick(e) {
+                const cell = e.target.closest('.grid-cell.occupied');
+                if (!cell) return;
+                const activeClass = getActiveClass();
+                if (!activeClass || !activeClass.currentSessionId) return;
+                const studentId = parseInt(cell.dataset.studentId);
+                const student = activeClass.students.find(s => s.id === studentId);
+                if (student) showInteractionMenu(cell, student);
+            }
+
+            function toggleClass() {
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                if (activeClass.currentSessionId) {
+                    const session = getCurrentSession();
+                    if (session) session.isComplete = true;
+                    activeClass.currentSessionId = null;
+                    showToast('Aula terminada.', 'info');
+                    setTimeout(() => showReportModal(session.id), 1000);
+                } else {
+                    const newSessionId = activeClass.nextSessionId++;
+                    activeClass.sessions.push({ id: newSessionId, date: new Date().toISOString(), interactions: {}, notes: {}, layout: { ...activeClass.classroomLayout }, isComplete: false });
+                    activeClass.currentSessionId = newSessionId;
+                    showToast('Aula iniciada!', 'success');
+                }
+                saveState();
+                renderAll();
+            }
+
+            function clearCurrentSessionData() {
+                const session = getCurrentSession();
+                if (session) {
+                    session.interactions = {};
+                    session.notes = {};
+                    saveState();
+                    renderAll();
+                    showToast('Dados da aula atual limpos.', 'success');
+                }
+            }
+            
+            function handleInteraction(e) {
+                const button = e.target.closest('.interaction-btn');
+                if (!button) return;
+                const session = getCurrentSession();
+                if (!session) return;
+                const interactionType = button.dataset.type;
+                const studentId = parseInt(DOMElements.interactionMenu.dataset.studentId);
+                if (!session.interactions[studentId]) session.interactions[studentId] = {};
+                session.interactions[studentId][interactionType] = (session.interactions[studentId][interactionType] || 0) + 1;
+                closeInteractionMenu();
+                const student = getActiveClass().students.find(s => s.id === studentId);
+                showToast(`${INTERACTION_TYPES[interactionType].label}: ${student.name}`, 'success');
+                saveState();
+                renderAll();
+            }
+
+            function handleSaveNote() {
+                const session = getCurrentSession();
+                if (!session) return;
+                const studentId = parseInt(DOMElements.interactionMenu.dataset.studentId);
+                const noteText = DOMElements.interactionNoteTextarea.value.trim();
+
+                if (noteText) {
+                    session.notes[studentId] = noteText;
+                    showToast("Nota guardada.", "success");
+                } else {
+                    delete session.notes[studentId]; // Remove a nota se estiver vazia
+                    showToast("Nota removida.", "info");
+                }
+                saveState();
+                renderAll();
+                closeInteractionMenu();
+            }
+
+            function handleRandomStudentSelection() {
+                const session = getCurrentSession();
+                const activeClass = getActiveClass();
+                if (!session) {
+                    showToast("Inicie uma aula para selecionar um aluno.", "info");
+                    return;
+                }
+                const studentsInGrid = Object.entries(activeClass.classroomLayout).filter(([, s]) => s).map(([i, s]) => ({ ...s, cellIndex: i }));
+                if (studentsInGrid.length === 0) {
+                    showToast("Não há alunos na grelha.", "warning");
+                    return;
+                }
+                const nonParticipants = studentsInGrid.filter(s => !session.interactions[s.id] || Object.values(session.interactions[s.id]).reduce((a, b) => a + b, 0) === 0);
+                const pool = nonParticipants.length > 0 ? nonParticipants : studentsInGrid;
+                const selectedStudent = pool[Math.floor(Math.random() * pool.length)];
+                const cell = DOMElements.classroomGrid.querySelector(`[data-cell-index="${selectedStudent.cellIndex}"]`);
+                if (cell) {
+                    cell.classList.remove('highlight');
+                    void cell.offsetWidth;
+                    cell.classList.add('highlight');
+                }
+                showToast(`Aluno selecionado: ${selectedStudent.name}`, 'success');
+            }
+            
+            function generateReport(sessionId) {
+                const activeClass = getActiveClass();
+                const session = activeClass.sessions.find(s => s.id === sessionId);
+                if (!session) return showToast("Sessão não encontrada.", "error");
+
+                const lowParticipationList = document.getElementById('low-participation-list');
+                const interactionDetailsContainer = document.getElementById('interaction-details-container');
+                const notesDetailsContainer = document.getElementById('notes-details-container');
+                if (!lowParticipationList || !interactionDetailsContainer || !notesDetailsContainer) {
+                    console.error("Um ou mais elementos do relatório não foram encontrados no DOM.");
+                    return;
+                }
+                
+                const { interactions, layout, notes } = session;
+                const studentsInGrid = Object.values(layout).filter(Boolean);
+                const lowParticipationStudents = studentsInGrid.filter(s => !interactions[s.id] || Object.values(interactions[s.id]).reduce((a, b) => a + b, 0) === 0);
+                lowParticipationList.innerHTML = lowParticipationStudents.length === 0 ? `<div class="participation-item"><span>🎉 Todos os alunos na grelha participaram!</span></div>` : lowParticipationStudents.map(s => `<div class="participation-item"><span>${s.name} (Nº ${s.number})</span><span class="status status--warning">Sem participação</span></div>`).join('');
+                
+                const interactionsByType = {};
+                for (const [studentId, studentInteractions] of Object.entries(interactions)) {
+                    const student = activeClass.students.find(s => s.id === parseInt(studentId));
+                    if (!student) continue;
+                    for (const [type, count] of Object.entries(studentInteractions)) {
+                        if (count > 0) {
+                            if (!interactionsByType[type]) interactionsByType[type] = { total: 0, students: [] };
+                            interactionsByType[type].total += count;
+                            interactionsByType[type].students.push({ name: student.name, count });
+                        }
+                    }
+                }
+                const sortedInteractionTypes = Object.entries(interactionsByType).sort(([, a], [, b]) => b.total - a.total);
+                if (sortedInteractionTypes.length === 0) {
+                    interactionDetailsContainer.innerHTML = `<div class="participation-item"><span>Não foram registadas interações nesta aula.</span></div>`;
+                } else {
+                    interactionDetailsContainer.innerHTML = sortedInteractionTypes.map(([type, data]) => {
+                        const typeInfo = INTERACTION_TYPES[type];
+                        data.students.sort((a, b) => b.count - a.count);
+                        return `<details class="report-details"><summary class="report-summary"><span class="report-summary-label"><span class="interaction-icon">${typeInfo.icon}</span><span>${typeInfo.label}</span></span><strong>${data.total}</strong></summary><ul class="report-student-list">${data.students.map(s => `<li>${s.name} (${s.count}x)</li>`).join('')}</ul></details>`;
+                    }).join('');
+                }
+
+                const notesEntries = Object.entries(notes || {});
+                if (notesEntries.length === 0) {
+                    notesDetailsContainer.innerHTML = `<li>Nenhuma anotação nesta aula.</li>`;
+                } else {
+                    notesDetailsContainer.innerHTML = notesEntries.map(([studentId, note]) => {
+                        const student = activeClass.students.find(s => s.id === parseInt(studentId));
+                        return `<li><strong>${student ? student.name : 'Aluno desconhecido'}:</strong> ${note}</li>`;
+                    }).join('');
+                }
+            }
+
+            function exportReportToCSV(sessionId) {
+                const activeClass = getActiveClass();
+                const session = activeClass.sessions.find(s => s.id === parseInt(sessionId, 10));
+                if (!session) return;
+                let csvContent = "data:text/csv;charset=utf-8,";
+                const sessionDate = new Date(session.date);
+                csvContent += `Relatorio da Turma;${activeClass.name}\r\n`;
+                csvContent += `Data da Aula;${sessionDate.toLocaleDateString('pt-PT')}\r\n\r\n`;
+                const { interactions, layout, notes } = session;
+                const studentsInGrid = Object.values(layout).filter(Boolean);
+                const lowParticipationStudents = studentsInGrid.filter(s => !interactions[s.id] || Object.values(interactions[s.id]).reduce((a, b) => a + b, 0) === 0);
+                csvContent += "Alunos Menos Participativos\r\n";
+                csvContent += "Nome do Aluno;Numero\r\n";
+                if (lowParticipationStudents.length > 0) {
+                    lowParticipationStudents.forEach(s => { csvContent += `"${s.name}";"${s.number}"\r\n`; });
+                } else {
+                    csvContent += "Todos os alunos na grelha participaram.\r\n";
+                }
+                csvContent += "\r\n";
+                csvContent += "Detalhe das Interacoes\r\n";
+                csvContent += "Tipo de Interacao;Aluno;Contagem\r\n";
+                for (const [studentId, studentInteractions] of Object.entries(interactions)) {
+                    const student = activeClass.students.find(s => s.id === parseInt(studentId));
+                    if (!student) continue;
+                    for (const [type, count] of Object.entries(studentInteractions)) {
+                        if (count > 0) csvContent += `"${INTERACTION_TYPES[type].label}";"${student.name}";${count}\r\n`;
+                    }
+                }
+                csvContent += "\r\n";
+                csvContent += "Anotacoes da Aula\r\n";
+                csvContent += "Aluno;Anotacao\r\n";
+                for (const [studentId, note] of Object.entries(notes || {})) {
+                    const student = activeClass.students.find(s => s.id === parseInt(studentId));
+                    if(student) csvContent += `"${student.name}";"${note.replace(/"/g, '""')}"\r\n`;
+                }
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `relatorio_${activeClass.name.replace(/\s+/g, '_')}_${sessionDate.toLocaleDateString('pt-PT')}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function showHistoryModal() {
+                const activeClass = getActiveClass();
+                if (!activeClass || activeClass.sessions.length === 0) {
+                    showToast("Nenhuma aula no histórico desta turma.", "info");
+                    return;
+                }
+                DOMElements.historyListContainer.innerHTML = [...activeClass.sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).map(session => {
+                    const sessionDate = new Date(session.date);
+                    const dateString = sessionDate.toLocaleDateString('pt-PT', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const timeString = sessionDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                    return `<div class="history-item"><span>Aula de ${dateString} - ${timeString}</span><div class="history-item-actions"><button class="btn btn--secondary btn--sm" data-session-id="${session.id}" data-action="view-report">Ver Relatório</button><button class="btn btn--danger btn--sm" data-session-id="${session.id}" data-action="delete-session">Apagar</button></div></div>`;
+                }).join('');
+                DOMElements.historyListContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleHistoryAction));
+                showModal('history-modal');
+            }
+
+            function handleHistoryAction(e) {
+                const { sessionId, action } = e.target.dataset;
+                const sessionNumId = parseInt(sessionId, 10);
+                if (action === 'view-report') {
+                    closeAllModals();
+                    showReportModal(sessionNumId);
+                } else if (action === 'delete-session') {
+                    showConfirmation("Tem a certeza que deseja apagar esta sessão de aula?", () => {
+                        deleteSession(sessionNumId);
+                        closeAllModals();
+                        showHistoryModal();
+                    });
+                }
+            }
+
+            function deleteSession(sessionId) {
+                const activeClass = getActiveClass();
+                activeClass.sessions = activeClass.sessions.filter(s => s.id !== sessionId);
+                saveState();
+                showToast("Sessão apagada com sucesso.", "success");
+            }
+
+            function showReportModal(sessionId) {
+                const activeClass = getActiveClass();
+                const session = activeClass.sessions.find(s => s.id === sessionId);
+                if (!session) return;
+                const sessionDate = new Date(session.date);
+                DOMElements.reportModalTitle.textContent = `Relatório da Aula (${sessionDate.toLocaleDateString('pt-PT')})`;
+                document.getElementById('report-modal').dataset.sessionId = sessionId;
+                generateReport(sessionId);
+                showModal('report-modal');
+            }
+            
+            function populateClassManagementModal() {
+                DOMElements.classSelectDropdown.innerHTML = Object.values(appState.classes).map(c => `<option value="${c.id}" ${c.id === appState.activeClassId ? 'selected' : ''}>${c.name}</option>`).join('');
+            };
+            function handleCreateClass(e) {
+                e.preventDefault();
+                const input = document.getElementById('new-class-name');
+                const newName = input.value.trim();
+                if (newName) {
+                    createNewClass(newName);
+                    input.value = '';
+                    populateClassManagementModal();
+                    renderAll();
+                }
+            };
+            function handleSelectClass(e) {
+                appState.activeClassId = e.target.value;
+                saveState();
+                renderAll();
+            };
+            function handleRenameClass(e) {
+                e.preventDefault();
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                const input = document.getElementById('rename-class-name');
+                const newName = input.value.trim();
+                if (newName) {
+                    activeClass.name = newName;
+                    input.value = '';
+                    saveState();
+                    populateClassManagementModal();
+                    updateHeader();
+                    showToast("Turma renomeada.", "success");
+                }
+            };
+            function handleDeleteClass() {
+                if (Object.keys(appState.classes).length <= 1) {
+                    showToast("Não pode apagar a única turma.", "error");
+                    return;
+                }
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                showConfirmation(`Tem a certeza que deseja apagar a turma "${activeClass.name}"?`, () => {
+                    delete appState.classes[appState.activeClassId];
+                    appState.activeClassId = Object.keys(appState.classes)[0];
+                    saveState();
+                    populateClassManagementModal();
+                    renderAll();
+                    showToast(`Turma "${activeClass.name}" apagada.`, "success");
+                });
+            };
+            function handleAddStudentSubmit(e) {
+                e.preventDefault();
+                const name = document.getElementById('add-student-name').value.trim();
+                const number = document.getElementById('add-student-number').value.trim();
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                if (activeClass.students.some(s => s.number === number)) {
+                    showToast('Já existe um aluno com este número nesta turma.', 'error');
+                    return;
+                }
+                const newStudent = { id: activeClass.nextStudentId++, name, number };
+                activeClass.students.push(newStudent);
+                saveState();
+                showToast(`Aluno ${name} adicionado com sucesso.`, 'success');
+                e.target.reset();
+                closeAllModals();
+                renderAll();
+            };
+            function handleEditStudentSubmit(e) {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('edit-student-id').value);
+                const name = document.getElementById('edit-student-name').value.trim();
+                const number = document.getElementById('edit-student-number').value.trim();
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                if (activeClass.students.some(s => s.number === number && s.id !== id)) {
+                    showToast('Já existe outro aluno com este número nesta turma.', 'error');
+                    return;
+                }
+                const studentToUpdate = activeClass.students.find(s => s.id === id);
+                if (studentToUpdate) {
+                    studentToUpdate.name = name;
+                    studentToUpdate.number = number;
+                }
+                Object.values(activeClass.classroomLayout).forEach(studentInCell => {
+                    if (studentInCell?.id === id) {
+                        studentInCell.name = name;
+                        studentInCell.number = number;
+                    }
+                });
+                saveState();
+                showToast(`Aluno ${name} atualizado com sucesso.`, 'success');
+                closeAllModals();
+                renderAll();
+            };
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const activeClass = getActiveClass();
+                    if (!activeClass) return;
+                    const lines = e.target.result.split(/\r\n|\n/);
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    lines.slice(1).forEach(line => {
+                        line = line.trim();
+                        if (line === '') return;
+                        const parts = line.split(/[,;]/);
+                        if (parts.length < 2) {
+                            skippedCount++;
+                            return;
+                        }
+                        const name = parts[0].trim();
+                        const number = parts[1].trim();
+                        if (!name || !number || activeClass.students.some(s => s.number === number)) {
+                            skippedCount++;
+                            return;
+                        }
+                        const newStudent = { id: activeClass.nextStudentId++, name, number };
+                        activeClass.students.push(newStudent);
+                        importedCount++;
+                    });
+                    if (importedCount > 0) {
+                        saveState();
+                        renderAll();
+                        showToast(`${importedCount} aluno(s) importado(s).`, 'success');
+                    }
+                    if (skippedCount > 0) {
+                        showToast(`${skippedCount} aluno(s) ignorado(s).`, 'info');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            };
+            function handleStudentAction(e) {
+                const button = e.target.closest('.student-action-btn');
+                if (!button) return;
+                const studentId = parseInt(button.dataset.studentId);
+                const activeClass = getActiveClass();
+                if (!activeClass) return;
+                const student = activeClass.students.find(s => s.id === studentId);
+                if (button.classList.contains('remove')) {
+                    if (student) showConfirmation(`Remover o aluno ${student.name}?`, () => {
+                        activeClass.students = activeClass.students.filter(s => s.id !== studentId);
+                        Object.keys(activeClass.classroomLayout).forEach(key => {
+                            if (activeClass.classroomLayout[key]?.id === studentId) {
+                                delete activeClass.classroomLayout[key];
+                            }
+                        });
+                        saveState();
+                        renderAll();
+                        showToast(`Aluno ${student.name} removido.`, 'success');
+                    });
+                } else if (button.classList.contains('edit')) {
+                    if (student) {
+                        document.getElementById('edit-student-id').value = student.id;
+                        document.getElementById('edit-student-name').value = student.name;
+                        document.getElementById('edit-student-number').value = student.number;
+                        showModal('edit-student-modal');
+                    }
+                }
+            };
+            
+            function populateInteractionMenu() {
+                DOMElements.interactionMenuBody.innerHTML = Object.entries(INTERACTION_TYPES).map(([type, {label, icon}]) => `
+                    <button class="interaction-btn" data-type="${type}">
+                        <span class="interaction-icon">${icon}</span>
+                        <span>${label}</span>
+                    </button>
+                `).join('');
+            }
+
+            function setupDragAndDrop() {
+                const activeClass = getActiveClass();
+                const isClassActive = !!activeClass?.currentSessionId;
+                document.querySelectorAll('.student-item').forEach(item => {
+                    item.setAttribute('draggable', !isClassActive);
+                    item.addEventListener('dragstart', e => {
+                        if (isClassActive) { e.preventDefault(); return; }
+                        e.dataTransfer.setData('text/plain', e.target.dataset.studentId);
+                        e.target.classList.add('dragging');
+                    });
+                    item.addEventListener('dragend', e => e.target.classList.remove('dragging'));
+                });
+                DOMElements.classroomGrid.querySelectorAll('.grid-cell.occupied').forEach(cell => {
+                    cell.setAttribute('draggable', !isClassActive);
+                });
+                DOMElements.classroomGrid.querySelectorAll('.grid-cell').forEach(cell => {
+                    cell.addEventListener('dragover', e => {
+                        if (isClassActive) return;
+                        e.preventDefault();
+                        e.currentTarget.classList.add('drag-over');
+                    });
+                    cell.addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
+                    cell.addEventListener('drop', handleDrop);
+                });
+            }
+
+            function setupEventListeners() {
+                DOMElements.activeClassName.addEventListener('click', () => {
+                    populateClassManagementModal();
+                    showModal('manage-classes-modal');
+                });
+                DOMElements.addStudentForm.addEventListener('submit', handleAddStudentSubmit);
+                DOMElements.editStudentForm.addEventListener('submit', handleEditStudentSubmit);
+                DOMElements.studentsList.addEventListener('click', handleStudentAction);
+                DOMElements.classroomGrid.addEventListener('click', handleCellClick);
+                DOMElements.importCsvBtn.addEventListener('click', () => DOMElements.csvFileInput.click());
+                DOMElements.csvFileInput.addEventListener('change', handleFileUpload);
+                DOMElements.toggleClassBtn.addEventListener('click', toggleClass);
+                DOMElements.randomStudentBtn.addEventListener('click', handleRandomStudentSelection);
+                document.getElementById('clear-data-btn').addEventListener('click', () => {
+                    const session = getCurrentSession();
+                    if(session) {
+                        showConfirmation('Tem a certeza que deseja limpar as interações e notas desta aula?', () => clearCurrentSessionData());
+                    } else {
+                        showToast("Nenhuma aula ativa para limpar.", "info");
+                    }
+                });
+                document.getElementById('save-layout-btn').addEventListener('click', () => {
+                    saveState();
+                    showToast('Layout guardado com sucesso!', 'success');
+                });
+                document.getElementById('export-report-btn').addEventListener('click', () => {
+                    const sessionId = document.getElementById('report-modal').dataset.sessionId;
+                    exportReportToCSV(sessionId);
+                });
+                DOMElements.classHistoryBtn.addEventListener('click', showHistoryModal);
+                document.querySelectorAll('.modal__close, .modal__overlay').forEach(el => el.addEventListener('click', closeAllModals));
+                document.getElementById('confirm-cancel-btn').addEventListener('click', closeAllModals);
+                document.querySelector('#interaction-menu .interaction-menu__close').addEventListener('click', closeInteractionMenu);
+                DOMElements.interactionMenuBody.addEventListener('click', handleInteraction);
+                DOMElements.saveNoteBtn.addEventListener('click', handleSaveNote);
+                DOMElements.createClassForm.addEventListener('submit', handleCreateClass);
+                DOMElements.classSelectDropdown.addEventListener('change', handleSelectClass);
+                DOMElements.renameClassForm.addEventListener('submit', handleRenameClass);
+                DOMElements.deleteClassBtn.addEventListener('click', handleDeleteClass);
+                document.getElementById('add-student-btn-modal').addEventListener('click', () => showModal('add-student-modal'));
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        closeAllModals();
+                        closeInteractionMenu();
+                    }
+                });
+            }
+
+            function initApp() {
+                loadState();
+                if (Object.keys(appState.classes).length === 0) {
+                    createNewClass("Minha Primeira Turma", false);
+                    saveState();
+                }
+                if (!appState.activeClassId || !appState.classes[appState.activeClassId]) {
+                    appState.activeClassId = Object.keys(appState.classes)[0] || null;
+                }
+                setupEventListeners();
+                renderAll();
+                populateInteractionMenu();
+            }
+
+            // --- INICIALIZAÇÃO DA APLICAÇÃO ---
+            initApp();
+
+        });
+    </script>
+</body>
+</html>
