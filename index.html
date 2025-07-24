@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grelha Ativa - Monitorização da Participação</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             /* Paleta de Cores Primitiva */
@@ -208,9 +210,9 @@
         /* Secção da Sala de Aula */
         .classroom-section { display: flex; flex-direction: column; }
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-16); }
-        .classroom-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: var(--space-8); flex: 1; background-color: var(--color-surface); padding: var(--space-16); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); }
+        .classroom-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: var(--space-8); flex: 1; background-color: var(--color-surface); padding: var(--space-16); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); position: relative; }
 
-        .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8); border-radius: var(--radius-base); transition: all var(--duration-normal) var(--ease-standard); position: relative; }
+        .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8); border-radius: var(--radius-base); transition: all var(--duration-normal) var(--ease-standard); position: relative; z-index: 1; }
         .grid-cell.empty { border: 2px dashed var(--color-border); background-color: rgba(var(--color-slate-900-rgb), 0.02); }
         .grid-cell.occupied { border: 1px solid var(--color-border); background-color: var(--color-surface); cursor: pointer; }
         .grid-cell.occupied:hover { border-color: var(--color-primary); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
@@ -227,6 +229,32 @@
             40% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(var(--color-teal-500-rgb), 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-teal-500-rgb), 0); }
         }
+
+        /* Modo de Grupos */
+        .group-creation-mode .grid-cell.occupied { cursor: cell; }
+        .grid-cell.cell-selected {
+            box-shadow: 0 0 0 3px var(--color-primary);
+            background-color: rgba(var(--color-teal-500-rgb), 0.2);
+        }
+        .group-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .group-overlay { position: absolute; border: 3px solid; border-radius: var(--radius-lg); pointer-events: all; cursor: pointer; }
+        .group-overlay:hover { background-color: rgba(0,0,0,0.05); }
+        .group-label {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-surface);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            white-space: nowrap;
+            border: 2px solid;
+            box-shadow: var(--shadow-sm);
+        }
+        .group-creation-panel { display: none; margin-top: var(--space-16); }
+        .group-creation-panel.active { display: flex; gap: var(--space-8); align-items: center; }
 
         /* Painel de Controlo */
         .control-actions { display: flex; flex-direction: column; gap: var(--space-12); margin-bottom: var(--space-24); }
@@ -259,6 +287,7 @@
         .interaction-icon { font-size: var(--font-size-lg); }
         .interaction-menu__notes { padding: var(--space-8); border-top: 1px solid var(--color-border); }
         .interaction-menu__notes textarea { width: 100%; min-height: 60px; resize: vertical; margin-bottom: var(--space-8); }
+        .interaction-menu__section-title { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); padding: var(--space-8) var(--space-12); margin-top: var(--space-8); border-top: 1px solid var(--color-border); }
 
         /* Modal de Relatório e Histórico */
         .report-section { margin-bottom: var(--space-24); }
@@ -323,6 +352,7 @@
                         <div class="students-list" id="students-list"></div>
                         <div class="panel-actions">
                             <button class="btn btn--secondary btn--sm btn--full-width" id="save-layout-btn">Guardar Layout</button>
+                            <button class="btn btn--secondary btn--sm btn--full-width" id="manage-groups-btn">Gerir Grupos</button>
                             <button class="btn btn--outline btn--sm btn--full-width" id="class-history-btn">Histórico de Aulas</button>
                         </div>
                     </aside>
@@ -333,7 +363,14 @@
                             <h3>Layout da Sala</h3>
                             <div id="class-status"></div>
                         </div>
-                        <div class="classroom-grid" id="classroom-grid"></div>
+                        <div class="classroom-grid" id="classroom-grid">
+                            <div class="group-container" id="group-container"></div>
+                        </div>
+                        <div class="group-creation-panel" id="group-creation-panel">
+                            <input type="text" id="group-name-input" class="form-control" placeholder="Nome do Grupo">
+                            <button id="create-group-btn" class="btn btn--primary">Criar Grupo</button>
+                            <button id="delete-group-btn" class="btn btn--danger" style="display: none;">Apagar Grupo</button>
+                        </div>
                     </div>
 
                     <!-- Painel de Controlo -->
@@ -457,6 +494,7 @@
                 </div>
             </div>
             <div class="modal__footer">
+                <button class="btn btn--secondary" id="export-pdf-btn">Exportar para PDF</button>
                 <button class="btn btn--primary" id="export-report-btn">Exportar para CSV</button>
             </div>
         </div>
@@ -531,7 +569,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONSTANTES, ESTADO E ELEMENTOS DO DOM ---
             const GRID_SIZE = 36;
-            const APP_STATE_KEY = 'grelhaAtivaMultiClassState_v3';
+            const APP_STATE_KEY = 'grelhaAtivaMultiClassState_v4';
 
             const INTERACTION_TYPES = {
                 "question": { label: "Fez uma pergunta", icon: "❓" },
@@ -540,17 +578,24 @@
                 "helped_colleague": { label: "Ajudou um colega", icon: "🤝" }
             };
 
+            const GROUP_COLORS = ['#E57373', '#81C784', '#64B5F6', '#FFD54F', '#9575CD', '#4DB6AC', '#F06292', '#7986CB'];
+
             const initialClassState = () => ({
                 id: null, name: '', students: [], classroomLayout: {},
                 sessions: [], currentSessionId: null, nextStudentId: 1, nextSessionId: 1,
+                groups: [], nextGroupId: 1,
             });
 
             let appState = { classes: {}, activeClassId: null, nextClassId: 1 };
+            let isGroupCreationModeActive = false;
+            let selectedCellsForGrouping = [];
+            let editingGroupId = null;
 
             const DOMElements = {
                 activeClassName: document.getElementById('active-class-name'),
                 studentsList: document.getElementById('students-list'),
                 classroomGrid: document.getElementById('classroom-grid'),
+                groupContainer: document.getElementById('group-container'),
                 toggleClassBtn: document.getElementById('toggle-class-btn'),
                 classStatus: document.getElementById('class-status'),
                 statistics: document.getElementById('statistics'),
@@ -578,6 +623,12 @@
                 historyListContainer: document.getElementById('history-list-container'),
                 reportModalTitle: document.getElementById('report-modal-title'),
                 notesDetailsContainer: document.getElementById('notes-details-container'),
+                manageGroupsBtn: document.getElementById('manage-groups-btn'),
+                groupCreationPanel: document.getElementById('group-creation-panel'),
+                groupNameInput: document.getElementById('group-name-input'),
+                createGroupBtn: document.getElementById('create-group-btn'),
+                deleteGroupBtn: document.getElementById('delete-group-btn'),
+                exportPdfBtn: document.getElementById('export-pdf-btn'),
             };
 
             // --- DECLARAÇÃO DE TODAS AS FUNÇÕES ---
@@ -612,6 +663,8 @@
                                 classData.sessions.forEach(session => {
                                     session.notes = session.notes || {}; // Garante que a propriedade notes existe
                                 });
+                                classData.groups = classData.groups || [];
+                                classData.nextGroupId = classData.nextGroupId || 1;
                             }
                         }
                     }
@@ -642,6 +695,7 @@
                 document.querySelector('.layout-container').style.display = 'grid';
                 renderStudentsList();
                 renderClassroomGrid();
+                renderGroups();
                 updateStatistics();
                 updateClassStatusUI();
                 updateHeader();
@@ -702,7 +756,48 @@
                         </div>`;
                 }).join('');
                 DOMElements.classroomGrid.innerHTML = gridHtml;
+                DOMElements.classroomGrid.appendChild(DOMElements.groupContainer); // Re-anexar o container do grupo
             };
+
+            function renderGroups() {
+                const activeClass = getActiveClass();
+                DOMElements.groupContainer.innerHTML = '';
+                if (!activeClass || !activeClass.groups) return;
+
+                activeClass.groups.forEach((group, index) => {
+                    const groupCells = group.cells.map(cellIndex => DOMElements.classroomGrid.querySelector(`[data-cell-index="${cellIndex}"]`)).filter(Boolean);
+                    if (groupCells.length === 0) return;
+
+                    const gridRect = DOMElements.classroomGrid.getBoundingClientRect();
+                    let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+
+                    groupCells.forEach(cell => {
+                        const rect = cell.getBoundingClientRect();
+                        minX = Math.min(minX, rect.left);
+                        minY = Math.min(minY, rect.top);
+                        maxX = Math.max(maxX, rect.right);
+                        maxY = Math.max(maxY, rect.bottom);
+                    });
+
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'group-overlay';
+                    groupDiv.style.left = `${minX - gridRect.left}px`;
+                    groupDiv.style.top = `${minY - gridRect.top}px`;
+                    groupDiv.style.width = `${maxX - minX}px`;
+                    groupDiv.style.height = `${maxY - minY}px`;
+                    groupDiv.style.borderColor = GROUP_COLORS[index % GROUP_COLORS.length];
+                    groupDiv.dataset.groupId = group.id;
+
+                    const label = document.createElement('div');
+                    label.className = 'group-label';
+                    label.textContent = group.name;
+                    label.style.color = GROUP_COLORS[index % GROUP_COLORS.length];
+                    label.style.borderColor = GROUP_COLORS[index % GROUP_COLORS.length];
+                    groupDiv.appendChild(label);
+
+                    DOMElements.groupContainer.appendChild(groupDiv);
+                });
+            }
 
             function updateStatistics() {
                 const currentSession = getCurrentSession();
@@ -713,7 +808,7 @@
                 }
                 const interactions = currentSession.interactions;
                 const totalInteractions = Object.values(interactions).flatMap(Object.values).reduce((sum, count) => sum + count, 0);
-                const participatingStudentsCount = Object.keys(interactions).filter(id => Object.values(interactions[id]).reduce((a, b) => a + b, 0) > 0).length;
+                const participatingStudentsCount = Object.keys(interactions).filter(id => !id.startsWith('group_') && Object.values(interactions[id]).reduce((a, b) => a + b, 0) > 0).length;
                 DOMElements.totalInteractions.textContent = totalInteractions;
                 DOMElements.participatingStudents.textContent = participatingStudentsCount;
             };
@@ -757,14 +852,34 @@
                 showModal('confirm-modal');
             };
             function closeInteractionMenu() { DOMElements.interactionMenu.classList.remove('active'); };
-            function showInteractionMenu(cell, student) {
+            function showInteractionMenu(cell, student, group) {
                 const rect = cell.getBoundingClientRect();
                 const menu = DOMElements.interactionMenu;
                 menu.dataset.studentId = student.id;
+                if (group) menu.dataset.groupId = group.id;
+                else delete menu.dataset.groupId;
+
                 document.getElementById('interaction-student-name').textContent = student.name;
                 
                 const session = getCurrentSession();
                 DOMElements.interactionNoteTextarea.value = session?.notes?.[student.id] || '';
+                
+                const body = DOMElements.interactionMenuBody;
+                populateInteractionMenu();
+                if (group) {
+                    const groupTitle = document.createElement('div');
+                    groupTitle.className = 'interaction-menu__section-title';
+                    groupTitle.textContent = `Grupo: ${group.name}`;
+                    body.appendChild(groupTitle);
+                    Object.entries(INTERACTION_TYPES).forEach(([type, {label, icon}]) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'interaction-btn';
+                        btn.dataset.type = type;
+                        btn.dataset.isGroup = 'true';
+                        btn.innerHTML = `<span class="interaction-icon">${icon}</span><span>${label} (Grupo)</span>`;
+                        body.appendChild(btn);
+                    });
+                }
 
                 menu.style.left = `${rect.left}px`;
                 menu.style.top = `${rect.bottom + 5}px`;
@@ -799,10 +914,48 @@
                 const cell = e.target.closest('.grid-cell.occupied');
                 if (!cell) return;
                 const activeClass = getActiveClass();
-                if (!activeClass || !activeClass.currentSessionId) return;
+                if (!activeClass) return;
+
+                if (isGroupCreationModeActive) {
+                    cell.classList.toggle('cell-selected');
+                    const cellIndex = parseInt(cell.dataset.cellIndex);
+                    if (selectedCellsForGrouping.includes(cellIndex)) {
+                        selectedCellsForGrouping = selectedCellsForGrouping.filter(i => i !== cellIndex);
+                    } else {
+                        selectedCellsForGrouping.push(cellIndex);
+                    }
+                    DOMElements.groupCreationPanel.classList.toggle('active', selectedCellsForGrouping.length > 0);
+                    return;
+                }
+
+                if (!activeClass.currentSessionId) return;
                 const studentId = parseInt(cell.dataset.studentId);
                 const student = activeClass.students.find(s => s.id === studentId);
-                if (student) showInteractionMenu(cell, student);
+                const cellIndex = parseInt(cell.dataset.cellIndex);
+                const group = activeClass.groups.find(g => g.cells.includes(cellIndex));
+                if (student) showInteractionMenu(cell, student, group);
+            }
+
+            function handleCellDoubleClick(e) {
+                const cell = e.target.closest('.grid-cell.occupied');
+                if (!cell) return;
+
+                const activeClass = getActiveClass();
+                if (!activeClass || activeClass.currentSessionId || isGroupCreationModeActive) return;
+
+                const cellIndex = parseInt(cell.dataset.cellIndex);
+                const student = activeClass.classroomLayout[cellIndex];
+                if (student) {
+                    activeClass.groups.forEach(group => {
+                        group.cells = group.cells.filter(c => c !== cellIndex);
+                    });
+                    activeClass.groups = activeClass.groups.filter(g => g.cells.length > 0);
+
+                    delete activeClass.classroomLayout[cellIndex];
+                    showToast(`${student.name} removido da grelha.`, 'info');
+                    saveState();
+                    renderAll();
+                }
             }
 
             function toggleClass() {
@@ -841,12 +994,22 @@
                 const session = getCurrentSession();
                 if (!session) return;
                 const interactionType = button.dataset.type;
-                const studentId = parseInt(DOMElements.interactionMenu.dataset.studentId);
-                if (!session.interactions[studentId]) session.interactions[studentId] = {};
-                session.interactions[studentId][interactionType] = (session.interactions[studentId][interactionType] || 0) + 1;
+                const isGroupInteraction = button.dataset.isGroup === 'true';
+                const targetId = isGroupInteraction ? `group_${DOMElements.interactionMenu.dataset.groupId}` : DOMElements.interactionMenu.dataset.studentId;
+                
+                if (!session.interactions[targetId]) session.interactions[targetId] = {};
+                session.interactions[targetId][interactionType] = (session.interactions[targetId][interactionType] || 0) + 1;
+                
                 closeInteractionMenu();
-                const student = getActiveClass().students.find(s => s.id === studentId);
-                showToast(`${INTERACTION_TYPES[interactionType].label}: ${student.name}`, 'success');
+                let targetName;
+                if (isGroupInteraction) {
+                    const group = getActiveClass().groups.find(g => g.id == DOMElements.interactionMenu.dataset.groupId);
+                    targetName = group.name;
+                } else {
+                    const student = getActiveClass().students.find(s => s.id == targetId);
+                    targetName = student.name;
+                }
+                showToast(`${INTERACTION_TYPES[interactionType].label}: ${targetName}`, 'success');
                 saveState();
                 renderAll();
             }
@@ -861,7 +1024,7 @@
                     session.notes[studentId] = noteText;
                     showToast("Nota guardada.", "success");
                 } else {
-                    delete session.notes[studentId]; // Remove a nota se estiver vazia
+                    delete session.notes[studentId];
                     showToast("Nota removida.", "info");
                 }
                 saveState();
@@ -897,10 +1060,11 @@
                 const activeClass = getActiveClass();
                 const session = activeClass.sessions.find(s => s.id === sessionId);
                 if (!session) return showToast("Sessão não encontrada.", "error");
-
+                
                 const lowParticipationList = document.getElementById('low-participation-list');
                 const interactionDetailsContainer = document.getElementById('interaction-details-container');
                 const notesDetailsContainer = document.getElementById('notes-details-container');
+
                 if (!lowParticipationList || !interactionDetailsContainer || !notesDetailsContainer) {
                     console.error("Um ou mais elementos do relatório não foram encontrados no DOM.");
                     return;
@@ -912,14 +1076,21 @@
                 lowParticipationList.innerHTML = lowParticipationStudents.length === 0 ? `<div class="participation-item"><span>🎉 Todos os alunos na grelha participaram!</span></div>` : lowParticipationStudents.map(s => `<div class="participation-item"><span>${s.name} (Nº ${s.number})</span><span class="status status--warning">Sem participação</span></div>`).join('');
                 
                 const interactionsByType = {};
-                for (const [studentId, studentInteractions] of Object.entries(interactions)) {
-                    const student = activeClass.students.find(s => s.id === parseInt(studentId));
-                    if (!student) continue;
-                    for (const [type, count] of Object.entries(studentInteractions)) {
+                for (const [targetId, targetInteractions] of Object.entries(interactions)) {
+                    let targetName;
+                    if (targetId.startsWith('group_')) {
+                        const group = activeClass.groups.find(g => `group_${g.id}` === targetId);
+                        targetName = group ? group.name : 'Grupo desconhecido';
+                    } else {
+                        const student = activeClass.students.find(s => s.id == targetId);
+                        targetName = student ? student.name : 'Aluno desconhecido';
+                    }
+
+                    for (const [type, count] of Object.entries(targetInteractions)) {
                         if (count > 0) {
-                            if (!interactionsByType[type]) interactionsByType[type] = { total: 0, students: [] };
+                            if (!interactionsByType[type]) interactionsByType[type] = { total: 0, participants: [] };
                             interactionsByType[type].total += count;
-                            interactionsByType[type].students.push({ name: student.name, count });
+                            interactionsByType[type].participants.push({ name: targetName, count });
                         }
                     }
                 }
@@ -929,8 +1100,8 @@
                 } else {
                     interactionDetailsContainer.innerHTML = sortedInteractionTypes.map(([type, data]) => {
                         const typeInfo = INTERACTION_TYPES[type];
-                        data.students.sort((a, b) => b.count - a.count);
-                        return `<details class="report-details"><summary class="report-summary"><span class="report-summary-label"><span class="interaction-icon">${typeInfo.icon}</span><span>${typeInfo.label}</span></span><strong>${data.total}</strong></summary><ul class="report-student-list">${data.students.map(s => `<li>${s.name} (${s.count}x)</li>`).join('')}</ul></details>`;
+                        data.participants.sort((a, b) => b.count - a.count);
+                        return `<details class="report-details"><summary class="report-summary"><span class="report-summary-label"><span class="interaction-icon">${typeInfo.icon}</span><span>${typeInfo.label}</span></span><strong>${data.total}</strong></summary><ul class="report-student-list">${data.participants.map(p => `<li>${p.name} (${p.count}x)</li>`).join('')}</ul></details>`;
                     }).join('');
                 }
 
@@ -965,12 +1136,18 @@
                 }
                 csvContent += "\r\n";
                 csvContent += "Detalhe das Interacoes\r\n";
-                csvContent += "Tipo de Interacao;Aluno;Contagem\r\n";
-                for (const [studentId, studentInteractions] of Object.entries(interactions)) {
-                    const student = activeClass.students.find(s => s.id === parseInt(studentId));
-                    if (!student) continue;
-                    for (const [type, count] of Object.entries(studentInteractions)) {
-                        if (count > 0) csvContent += `"${INTERACTION_TYPES[type].label}";"${student.name}";${count}\r\n`;
+                csvContent += "Tipo de Interacao;Participante (Aluno/Grupo);Contagem\r\n";
+                for (const [targetId, targetInteractions] of Object.entries(interactions)) {
+                    let targetName;
+                    if (targetId.startsWith('group_')) {
+                        const group = activeClass.groups.find(g => `group_${g.id}` === targetId);
+                        targetName = group ? group.name : 'Grupo desconhecido';
+                    } else {
+                        const student = activeClass.students.find(s => s.id == targetId);
+                        targetName = student ? student.name : 'Aluno desconhecido';
+                    }
+                    for (const [type, count] of Object.entries(targetInteractions)) {
+                        if (count > 0) csvContent += `"${INTERACTION_TYPES[type].label}";"${targetName}";${count}\r\n`;
                     }
                 }
                 csvContent += "\r\n";
@@ -988,6 +1165,97 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+
+            function exportReportToPDF(sessionId) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                const activeClass = getActiveClass();
+                const session = activeClass.sessions.find(s => s.id === sessionId);
+                if (!session) {
+                    showToast("Sessão não encontrada para exportar PDF.", "error");
+                    return;
+                }
+
+                const sessionDate = new Date(session.date);
+                const title = `Relatório da Aula - ${activeClass.name}`;
+                const subtitle = `Data: ${sessionDate.toLocaleDateString('pt-PT')} ${sessionDate.toLocaleTimeString('pt-PT')}`;
+
+                doc.setFontSize(18);
+                doc.text(title, 14, 22);
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(subtitle, 14, 30);
+
+                const { interactions, layout, notes } = session;
+                const studentsInGrid = Object.values(layout).filter(Boolean);
+
+                // Tabela: Alunos Menos Participativos
+                const lowParticipationStudents = studentsInGrid.filter(s => !interactions[s.id] || Object.values(interactions[s.id]).reduce((a, b) => a + b, 0) === 0);
+                let lowPartBody = [];
+                if (lowParticipationStudents.length > 0) {
+                    lowPartBody = lowParticipationStudents.map(s => [s.name, s.number]);
+                } else {
+                    lowPartBody = [["Todos os alunos na grelha participaram."]];
+                }
+                
+                doc.autoTable({
+                    startY: 40,
+                    head: [['Alunos Menos Participativos', 'Número']],
+                    body: lowPartBody,
+                    headStyles: { fillColor: [33, 128, 141] }, // --color-primary
+                });
+
+                // Tabela: Detalhe das Interações
+                const interactionsBody = [];
+                for (const [targetId, targetInteractions] of Object.entries(interactions)) {
+                    let targetName;
+                    if (targetId.startsWith('group_')) {
+                        const group = activeClass.groups.find(g => `group_${g.id}` === targetId);
+                        targetName = group ? `Grupo: ${group.name}` : 'Grupo desconhecido';
+                    } else {
+                        const student = activeClass.students.find(s => s.id == targetId);
+                        targetName = student ? student.name : 'Aluno desconhecido';
+                    }
+                    for (const [type, count] of Object.entries(targetInteractions)) {
+                        if (count > 0) {
+                            interactionsBody.push([INTERACTION_TYPES[type].label, targetName, count]);
+                        }
+                    }
+                }
+
+                if (interactionsBody.length > 0) {
+                    doc.autoTable({
+                        head: [['Tipo de Interação', 'Participante', 'Contagem']],
+                        body: interactionsBody,
+                        headStyles: { fillColor: [33, 128, 141] },
+                    });
+                }
+
+                // Tabela: Anotações da Aula
+                const notesBody = [];
+                const notesEntries = Object.entries(notes || {});
+                if (notesEntries.length > 0) {
+                    notesEntries.forEach(([studentId, note]) => {
+                        const student = activeClass.students.find(s => s.id === parseInt(studentId));
+                        if(student) {
+                            notesBody.push([student.name, note]);
+                        }
+                    });
+                }
+
+                if (notesBody.length > 0) {
+                    doc.autoTable({
+                        head: [['Aluno', 'Anotação']],
+                        body: notesBody,
+                        headStyles: { fillColor: [33, 128, 141] },
+                    });
+                }
+                
+                const filename = `relatorio_${activeClass.name.replace(/\s+/g, '_')}_${sessionDate.toLocaleDateString('pt-PT')}.pdf`;
+                doc.save(filename);
+                showToast("Relatório PDF exportado com sucesso!", "success");
             }
 
             function showHistoryModal() {
@@ -1238,6 +1506,63 @@
                 });
             }
 
+            function handleManageGroupsClick() {
+                isGroupCreationModeActive = !isGroupCreationModeActive;
+                DOMElements.classroomGrid.classList.toggle('group-creation-mode', isGroupCreationModeActive);
+                DOMElements.manageGroupsBtn.textContent = isGroupCreationModeActive ? 'Concluir Grupos' : 'Gerir Grupos';
+                if (!isGroupCreationModeActive) {
+                    DOMElements.groupCreationPanel.classList.remove('active');
+                    document.querySelectorAll('.cell-selected').forEach(cell => cell.classList.remove('cell-selected'));
+                    selectedCellsForGrouping = [];
+                }
+            }
+
+            function handleCreateGroup() {
+                const activeClass = getActiveClass();
+                const groupName = DOMElements.groupNameInput.value.trim();
+                if (!groupName) {
+                    showToast("Por favor, insira um nome para o grupo.", "error");
+                    return;
+                }
+                if (selectedCellsForGrouping.length === 0) {
+                    showToast("Selecione pelo menos uma mesa para o grupo.", "error");
+                    return;
+                }
+
+                const newGroup = {
+                    id: activeClass.nextGroupId++,
+                    name: groupName,
+                    cells: [...selectedCellsForGrouping]
+                };
+                activeClass.groups.push(newGroup);
+                
+                // Limpar
+                DOMElements.groupNameInput.value = '';
+                selectedCellsForGrouping = [];
+                document.querySelectorAll('.cell-selected').forEach(cell => cell.classList.remove('cell-selected'));
+                DOMElements.groupCreationPanel.classList.remove('active');
+
+                saveState();
+                renderGroups();
+                showToast(`Grupo "${groupName}" criado.`, "success");
+            }
+
+            function handleGroupClick(e) {
+                if (isGroupCreationModeActive && e.target.classList.contains('group-overlay')) {
+                    const groupId = parseInt(e.target.dataset.groupId);
+                    const activeClass = getActiveClass();
+                    const group = activeClass.groups.find(g => g.id === groupId);
+                    if (group) {
+                        showConfirmation(`Tem a certeza que deseja apagar o grupo "${group.name}"?`, () => {
+                            activeClass.groups = activeClass.groups.filter(g => g.id !== groupId);
+                            saveState();
+                            renderGroups();
+                            showToast("Grupo apagado.", "success");
+                        });
+                    }
+                }
+            }
+
             function setupEventListeners() {
                 DOMElements.activeClassName.addEventListener('click', () => {
                     populateClassManagementModal();
@@ -1247,6 +1572,7 @@
                 DOMElements.editStudentForm.addEventListener('submit', handleEditStudentSubmit);
                 DOMElements.studentsList.addEventListener('click', handleStudentAction);
                 DOMElements.classroomGrid.addEventListener('click', handleCellClick);
+                DOMElements.classroomGrid.addEventListener('dblclick', handleCellDoubleClick);
                 DOMElements.importCsvBtn.addEventListener('click', () => DOMElements.csvFileInput.click());
                 DOMElements.csvFileInput.addEventListener('change', handleFileUpload);
                 DOMElements.toggleClassBtn.addEventListener('click', toggleClass);
@@ -1267,6 +1593,10 @@
                     const sessionId = document.getElementById('report-modal').dataset.sessionId;
                     exportReportToCSV(sessionId);
                 });
+                DOMElements.exportPdfBtn.addEventListener('click', () => {
+                    const sessionId = parseInt(document.getElementById('report-modal').dataset.sessionId, 10);
+                    exportReportToPDF(sessionId);
+                });
                 DOMElements.classHistoryBtn.addEventListener('click', showHistoryModal);
                 document.querySelectorAll('.modal__close, .modal__overlay').forEach(el => el.addEventListener('click', closeAllModals));
                 document.getElementById('confirm-cancel-btn').addEventListener('click', closeAllModals);
@@ -1278,6 +1608,9 @@
                 DOMElements.renameClassForm.addEventListener('submit', handleRenameClass);
                 DOMElements.deleteClassBtn.addEventListener('click', handleDeleteClass);
                 document.getElementById('add-student-btn-modal').addEventListener('click', () => showModal('add-student-modal'));
+                DOMElements.manageGroupsBtn.addEventListener('click', handleManageGroupsClick);
+                DOMElements.createGroupBtn.addEventListener('click', handleCreateGroup);
+                DOMElements.groupContainer.addEventListener('click', handleGroupClick);
                 document.addEventListener('keydown', e => {
                     if (e.key === 'Escape') {
                         closeAllModals();
